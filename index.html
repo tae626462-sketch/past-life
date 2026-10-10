@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ชาติที่แล้วคุณเป็นอะไร?</title>
+<meta property="og:title" content="ชาติที่แล้วคุณเป็นอะไร? 🔮">
+<meta property="og:description" content="ใส่ชื่อ + วันเกิด รู้ทันที แม่นจนขนลุก">
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#1a0b2e;--bg2:#3b1466;--gold:#ffd166;--pink:#ff6fb5;--txt:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Sarabun,sans-serif;color:var(--txt);min-height:100vh;
+background:radial-gradient(circle at 30% 10%,var(--bg2),var(--bg1) 70%);
+display:flex;justify-content:center;padding:24px 16px}
+.wrap{width:100%;max-width:420px;text-align:center}
+h1{font-family:Mitr;font-size:30px;color:var(--gold);margin:10px 0 4px}
+.sub{opacity:.8;margin-bottom:24px}
+.box{background:rgba(255,255,255,.08);border-radius:20px;padding:22px;backdrop-filter:blur(6px)}
+input{width:100%;padding:14px;border-radius:12px;border:none;font-size:17px;margin-bottom:12px;font-family:Sarabun}
+button{width:100%;padding:15px;border:none;border-radius:14px;font-family:Mitr;font-size:18px;cursor:pointer;
+background:linear-gradient(90deg,var(--pink),var(--gold));color:#2a0a3a;font-weight:600;margin-top:6px}
+button.alt{background:rgba(255,255,255,.15);color:#fff}
+.orb{font-size:80px;margin:20px 0;display:inline-block}
+.spin{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+#res{display:none}
+canvas{width:100%;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.5);margin-bottom:14px}
+.row{display:flex;gap:8px}.row button{flex:1}
+.foot{opacity:.5;font-size:12px;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="form">
+    <div class="orb">🔮</div>
+    <h1>ชาติที่แล้วคุณเป็นอะไร?</h1>
+    <p class="sub">ดวงจิตจะเผยความจริง… แม่นจนขนลุก</p>
+    <div class="box">
+      <input id="name" placeholder="ชื่อเล่นของคุณ" maxlength="20">
+      <input id="bd" type="date">
+      <button onclick="go()">เปิดดวงจิต ✨</button>
+    </div>
+  </div>
+  <div id="load" style="display:none"><div class="orb spin">🔮</div><p id="lt">กำลังย้อนเวลา...</p></div>
+  <div id="res">
+    <canvas id="cv" width="1080" height="1350"></canvas>
+    <div class="row"><button onclick="save()">💾 เซฟรูป</button><button onclick="share()">📤 แชร์</button></div>
+    <button class="alt" onclick="again()">🔁 ลองชื่อเพื่อน</button>
+  </div>
+  <p class="foot">เพื่อความบันเทิงเท่านั้น 😆</p>
+</div>
+<script>
+const LIVES=[
+["👑","เจ้าหญิงอยุธยา","ชอบสั่ง ไม่ชอบทำ ชาตินี้เลยยังติดนิสัยรอให้คนอื่นทำให้"],
+["🐘","ช้างศึกพระนเรศวร","ใจสู้ไม่ถอย แต่กินเก่งมาตั้งแต่ชาติที่แล้ว"],
+["🧙","หมอผีประจำหมู่บ้าน","รู้ใจคนเก่ง ใครโกหกคุณจับได้หมด"],
+["🍜","แม่ค้าก๋วยเตี๋ยวเรือ","ปากหวาน ขายเก่ง ชาตินี้เลยเจรจาอะไรก็ได้"],
+["🐱","แมวในวัง","ขี้เกียจแต่มีคนรัก นอนเยอะคือกรรมเก่า"],
+["⚔️","ทหารองครักษ์","ซื่อสัตย์มาก เพื่อนเดือดร้อนคุณไปก่อนเสมอ"],
+["📜","ราชบัณฑิต","ฉลาดแต่คิดมาก ชาตินี้เลยนอนดึก"],
+["🎭","นักแสดงลิเก","ดราม่าเก่ง ชีวิตต้องมีสีสันตลอด"],
+["🏴‍☠️","โจรสลัดทะเลอันดามัน","รักอิสระ ไม่ชอบให้ใครมาสั่ง"],
+["🌸","นางรำในราชสำนัก","สวยสง่า เข้ากับคนง่าย มีเสน่ห์โดยไม่ตั้งใจ"],
+["🐉","พญานาคเฝ้าแม่น้ำ","มีบารมีแรง ดวงการเงินดีโดยไม่รู้ตัว"],
+["🧘","พระธุดงค์","ใจเย็นสุดๆ แต่ถ้าโกรธคือจบ"],
+["💰","เศรษฐีเรือสำเภา","หาเงินเก่ง แต่ใช้เก่งกว่า"],
+["🐒","ลิงหนุมาน","ซนเกินเบอร์ ไอเดียบรรเจิด อยู่นิ่งไม่ได้"],
+["💌","คนส่งสารรักของเจ้าชาย","คนชอบมาปรึกษาเรื่องหัวใจ แต่ของตัวเองยังวุ่น"],
+["🍳","พ่อครัวในวัง","ลิ้นทองคำ ชิมแล้วรู้เลยว่าอร่อยไหม"]
+];
+const DEATH=["สำลักข้าวเหนียวมะม่วง","หัวเราะจนลืมหายใจ","ตกเรือตอนจีบสาว","กินเยอะเกินไปในงานบุญ","ถูกแมวข่วนแล้วตกใจ","นอนหลับยาวไม่ตื่น"];
+const $=id=>document.getElementById(id);
+function hash(s){let h=2166136261;for(const c of s){h^=c.codePointAt(0);h=Math.imul(h,16777619)}return h>>>0}
+let R;
+function go(){
+  const n=$('name').value.trim(),b=$('bd').value;
+  if(!n){alert('ใส่ชื่อก่อนนะ');return}
+  const h=hash(n.toLowerCase()+'|'+b);
+  R={n,l:LIVES[h%LIVES.length],d:DEATH[(h>>5)%DEATH.length],y:1350+(h>>9)%400,p:70+(h>>13)%30};
+  $('form').style.display='none';$('load').style.display='block';
+  const t=["กำลังย้อนเวลา...","เปิดบันทึกกรรม...","ดวงจิตกำลังตอบ..."];let i=0;
+  const iv=setInterval(()=>{$('lt').textContent=t[++i%3]},700);
+  setTimeout(()=>{clearInterval(iv);$('load').style.display='none';draw();$('res').style.display='block'},2200);
+}
+function wrap(c,t,x,y,w,lh){let line='';for(const ch of t){if(c.measureText(line+ch).width>w){c.fillText(line,x,y);line=ch;y+=lh}else line+=ch}c.fillText(line,x,y)}
+function draw(){
+  const c=$('cv').getContext('2d'),W=1080,H=1350;
+  const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,'#3b1466');g.addColorStop(1,'#1a0b2e');
+  c.fillStyle=g;c.fillRect(0,0,W,H);
+  for(let i=0;i<80;i++){c.fillStyle='rgba(255,255,255,'+Math.random()*.6+')';c.beginPath();c.arc(Math.random()*W,Math.random()*H,Math.random()*3,0,7);c.fill()}
+  c.textAlign='center';c.fillStyle='#ffd166';c.font='600 52px Mitr';
+  c.fillText('ชาติที่แล้วของ "'+R.n+'"',W/2,150);
+  c.font='260px serif';c.fillText(R.l[0],W/2,480);
+  c.fillStyle='#fff';c.font='600 96px Mitr';c.fillText(R.l[1],W/2,640);
+  c.fillStyle='#ffd166';c.font='44px Sarabun';c.fillText('มีชีวิตอยู่ราว พ.ศ. '+(R.y+543),W/2,720);
+  c.fillStyle='#fff';c.font='46px Sarabun';wrap(c,R.l[2],W/2,830,880,64);
+  c.fillStyle='#ff6fb5';c.font='42px Sarabun';c.fillText('สาเหตุที่จากไป: '+R.d+' 💀',W/2,1010);
+  c.fillStyle='#ffd166';c.font='600 58px Mitr';c.fillText('ความแม่น '+R.p+'%',W/2,1120);
+  c.fillStyle='rgba(255,255,255,.6)';c.font='36px Sarabun';c.fillText('มาดูชาติที่แล้วของคุณ 👉 '+location.host,W/2,1270);
+}
+function blob(){return new Promise(r=>$('cv').toBlob(r,'image/png'))}
+async function save(){const a=document.createElement('a');a.href=URL.createObjectURL(await blob());a.download='ชาติที่แล้ว.png';a.click()}
+async function share(){
+  const f=new File([await blob()],'past-life.png',{type:'image/png'}),txt='ชาติที่แล้วฉันเป็น '+R.l[1]+' 😱 ลองของคุณ!';
+  try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],text:txt,url:location.href});
+  else if(navigator.share)await navigator.share({text:txt,url:location.href});
+  else{await navigator.clipboard.writeText(txt+' '+location.href);alert('คัดลอกลิงก์แล้ว!')}}catch(e){}
+}
+function again(){$('res').style.display='none';$('form').style.display='block';$('name').value='';$('name').focus()}
+</script>
+</body>
+</html>

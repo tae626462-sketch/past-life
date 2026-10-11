@@ -24,8 +24,14 @@ button.alt{background:rgba(255,255,255,.15);color:#fff}
 .orb{font-size:80px;margin:20px 0;display:inline-block}
 .spin{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
 #res{display:none}
-canvas{width:100%;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.5);margin-bottom:14px}
+#cv{display:none}
+#img{width:100%;display:block;-webkit-touch-callout:default;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.5);margin-bottom:14px}
 .row{display:flex;gap:8px}.row button{flex:1}
+.tip{font-size:14px;opacity:.75;margin:-4px 0 12px}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9;align-items:center;justify-content:center;padding:20px}
+#modal .mb{background:#2a1050;border-radius:20px;padding:22px;max-width:380px;width:100%}
+#modal img{width:100%;border-radius:12px;margin:12px 0}
+#modal p{line-height:1.6}
 .foot{opacity:.5;font-size:12px;margin-top:20px}
 </style>
 </head>
@@ -44,9 +50,13 @@ canvas{width:100%;border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.5);margi
   <div id="load" style="display:none"><div class="orb spin">🔮</div><p id="lt">กำลังย้อนเวลา...</p></div>
   <div id="res">
     <canvas id="cv" width="1080" height="1350"></canvas>
+    <img id="img" alt="ผลชาติที่แล้ว">
+    <p class="tip">📌 กดค้างที่รูป เพื่อบันทึกรูปได้ทันที</p>
     <div class="row"><button onclick="save()">💾 เซฟรูป</button><button onclick="share()">📤 แชร์</button></div>
     <button class="alt" onclick="again()">🔁 ลองชื่อเพื่อน</button>
   </div>
+  <div id="modal" onclick="if(event.target===this)this.style.display='none'"><div class="mb">
+  <p id="mt"></p><img id="mimg" alt=""><button onclick="$('modal').style.display='none'">เข้าใจแล้ว</button></div></div>
   <p class="foot">เพื่อความบันเทิงเท่านั้น 😆</p>
 </div>
 <script>
@@ -66,9 +76,59 @@ const LIVES=[
 ["💰","เศรษฐีเรือสำเภา","หาเงินเก่ง แต่ใช้เก่งกว่า"],
 ["🐒","ลิงหนุมาน","ซนเกินเบอร์ ไอเดียบรรเจิด อยู่นิ่งไม่ได้"],
 ["💌","คนส่งสารรักของเจ้าชาย","คนชอบมาปรึกษาเรื่องหัวใจ แต่ของตัวเองยังวุ่น"],
-["🍳","พ่อครัวในวัง","ลิ้นทองคำ ชิมแล้วรู้เลยว่าอร่อยไหม"]
+["🍳","พ่อครัวในวัง","ลิ้นทองคำ ชิมแล้วรู้เลยว่าอร่อยไหม"],
+["🦆","เป็ดในบึงวัด","เดินตามกันเป็นแถว ชาตินี้เลยชอบไปไหนเป็นแก๊ง"],
+["🐔","ไก่ชนประจำหมู่บ้าน","ขี้ตื่นเต้น ใจร้อน แต่ชนะทุกการเถียง"],
+["🧹","แม่บ้านในวัง","รู้ความลับทุกคน ชาตินี้เลยเม้าท์เก่ง"],
+["🎣","ชาวประมงริมโขง","อดทนรอได้นาน ยกเว้นตอนหิว"],
+["🥭","แม่ค้ามะม่วงหน้าวัด","หวานเจี๊ยบ แต่บางวันก็เปรี้ยวจี๊ด"],
+["🐃","ควายทองของผู้ใหญ่บ้าน","ทำงานหนักไม่บ่น แต่ถ้าดื้อขึ้นมาไม่มีใครฉุดอยู่"],
+["🦉","นกฮูกบนต้นโพธิ์","ตื่นกลางคืน ฉลาดเกินวัย ชาตินี้เลยนอนดึก"],
+["🎺","นักเป่าปี่พาทย์","เสียงดัง มีจังหวะ ชีวิตต้องมีเพลง"],
+["🧵","ช่างทอผ้าไหม","ละเอียด ใจเย็น งานต้องเป๊ะ"],
+["🐟","ปลากัดในโอ่ง","สวยแต่ดุ อยู่ร่วมกับใครยาก"],
+["🌾","ชาวนาผู้ขยัน","ตื่นเช้า ทำงานเก่ง แต่ชอบงีบกลางวัน"],
+["🗡️","นักดาบพเนจร","เท่ ลึกลับ พูดน้อยแต่ต่อยหนัก"],
+["🐍","งูเหลือมในสวนกล้วย","กินทีเดียวอิ่มสามวัน"],
+["🦜","นกแก้วของเจ้าพระยา","พูดเก่ง จำคำคนอื่นไปพูดต่อ"],
+["🏮","คนจุดตะเกียงในเมือง","เป็นแสงสว่างให้คนอื่น แต่ตัวเองนอนไม่พอ"],
+["🧪","หมอยาสมุนไพร","รู้ทุกเรื่องสุขภาพ แต่ไม่ค่อยทำตาม"],
+["🐸","กบในกะลา","ชอบอยู่บ้าน โลกส่วนตัวสูง"],
+["🎯","นักธนูประจำทัพ","เล็งอะไรก็ได้ เป้าหมายชัดเจน"],
+["🍚","คนหุงข้าวในโรงทาน","ใจบุญ ชอบให้คนอื่นอิ่มก่อน"],
+["🐓","ไก่ขันปลุกทั้งหมู่บ้าน","ตื่นเช้าแต่ไม่มีใครขอบคุณ"],
+["⛵","กัปตันเรือสำเภาจีน","ชอบเดินทาง อยู่ที่เดิมนานไม่ได้"],
+["🦚","นกยูงในอุทยานหลวง","ชอบอวด แต่สวยจริง"],
+["🧑‍🌾","คนเฝ้าสวนทุเรียน","รักของอร่อย ยอมอดนอนเพื่อของกิน"],
+["🎨","จิตรกรวาดฝาผนังวัด","มีศิลปะในหัวใจ แต่บ้านรกมาก"],
+["🐜","มดงานในจอมปลวก","ขยันสุด ทำงานเพื่อส่วนรวมจนลืมตัวเอง"],
+["👻","ผีบ้านผีเรือน","ชอบอยู่เงียบๆ แต่รู้ทุกเรื่องในบ้าน"],
+["🧞","ยักษ์เฝ้าวัดอรุณ","ดูดุแต่ใจดี ใครรู้จักแล้วจะรัก"],
+["🐢","เต่าในสระวัด","ช้าแต่ชัวร์ อายุยืนสุดในแก๊ง"],
+["🍌","คนขายกล้วยทอด","ร้อนแรง กรอบนอกนุ่มใน"],
+["🪕","นักร้องหมอลำ","ขึ้นเวทีเมื่อไหร่คือปัง"],
+["🐕","หมาวัดที่ทุกคนรัก","กินอิ่มนอนหลับ ใครผ่านมาก็ให้ขนม"],
+["🏹","พรานป่าแห่งดงพญาเย็น","รู้ทาง ไม่เคยหลง ยกเว้นในห้าง"],
+["🧓","ผู้ใหญ่บ้านคนแรก","ชอบประชุม ชอบตัดสินเรื่องคนอื่น"],
+["🦀","ปูนาริมคันนา","เดินเฉไฉ แต่สุดท้ายก็ถึง"],
+["🎐","คนทำโคมลอย","โรแมนติก ชอบของสวยงาม"],
+["🐿️","กระรอกในวัง","ไวเกินเบอร์ ชอบซ่อนของแล้วลืม"],
+["🥁","มือกลองยาว","ถ้ามีเพลงคือหยุดเต้นไม่ได้"],
+["🧔","ฤๅษีบนเขา","ปลีกวิเวก แต่ยังเล่นมือถือ (ชาตินี้)"],
+["🍯","คนเก็บน้ำผึ้งป่า","กล้าเสี่ยงเพื่อของหวาน"],
+["🐊","จระเข้ในคลองบางกอก","นิ่งๆ แต่ถ้าหิวคือน่ากลัว"],
+["🎎","ตุ๊กตาชาววังเลี่ยมทอง","หน้าตาดี แต่ขี้อาย"],
+["🕯️","คนเฝ้าศาลเจ้า","สายมูตัวจริง ไหว้ทุกศาลที่ผ่าน"],
+["🦢","หงส์ในสระพระราชวัง","สง่างาม แต่ถ้าโกรธจะจิกแรง"],
+["🛶","คนพายเรือขายของในตลาดน้ำ","ต่อรองราคาเก่งที่สุดในสามโลก"],
+["🐄","วัวพระโคแรกนา","ทายอะไรแม่น เลือกกินถูกทุกครั้ง"],
+["🥷","นินจาที่หลงมาสยาม","เงียบ ไว แต่หลงทางตลอด"],
+["🧁","คนทำขนมชาววัง","ทุกอย่างต้องสวยและอร่อย"],
+["🦋","ผีเสื้อในสวนดอกไม้","เปลี่ยนใจง่าย แต่โลกสดใสเสมอ"],
+["🐼","แพนด้าทูตสันถวไมตรี","น่ารักจนใครก็ยอม แต่ขี้เกียจขั้นสุด"],
+["🪷","ดอกบัวในสระวัด","ใจบริสุทธิ์ โคลนแค่ไหนก็ยังสวย"]
 ];
-const DEATH=["สำลักข้าวเหนียวมะม่วง","หัวเราะจนลืมหายใจ","ตกเรือตอนจีบสาว","กินเยอะเกินไปในงานบุญ","ถูกแมวข่วนแล้วตกใจ","นอนหลับยาวไม่ตื่น"];
+const DEATH=["สำลักข้าวเหนียวมะม่วง","หัวเราะจนลืมหายใจ","ตกเรือตอนจีบสาว","กินเยอะเกินไปในงานบุญ","ถูกแมวข่วนแล้วตกใจ","นอนหลับยาวไม่ตื่น","ลื่นเปลือกกล้วยตอนรีบไปกินข้าว","หัวเราะมุกตัวเองจนตกเก้าอี้","นอนรอแฟนตอบไลน์จนหลับยาว","กินส้มตำปูปลาร้าเผ็ดเกินพิกัด","ถูกห่านไล่จิกรอบวัด","เดินชนเสาเพราะมองคนหล่อ","แย่งขนมกับลิงแล้วแพ้","ตกต้นมะม่วงตอนแอบเก็บของคนอื่น","ร้องคาราโอเกะเสียงสูงเกินไป","ขี่ควายแล้วควายเบรกกะทันหัน","อดนอนดูละครหลังข่าว","ช็อกตอนเห็นราคาทอง","กินบุฟเฟ่ต์ไม่ยอมหยุด","แพ้เกมเป่ายิ้งฉุบแล้วเครียด","เต้นหมอลำจนหลังเคล็ด","ตามจีบคนเดิมสิบปีไม่สำเร็จ","โดนแม่ตีเพราะกลับบ้านดึก","สะดุดหมาวัดที่นอนขวางทาง","ลืมหายใจตอนเห็นบิลค่าไฟ","กินทุเรียนกับเหล้าพร้อมกัน","ตกเรือตอนเซลฟี่","โดนมดแดงรุมตอนแอบงีบ","อิจฉาเพื่อนจนตัวเขียว","ปีนกำแพงวังไปหาแฟน","หลงทางในตลาดนัดสามวันสามคืน","ขำจนกล้ามท้องแข็ง","กินข้าวเหนียวไม่ดื่มน้ำ","วิ่งหนีเจ้าหนี้ตกคลอง","ชนะหวยแล้วดีใจเกินไป","รอคิวร้านดังนานเกินไป","เถียงกับยายแล้วแพ้","ถูกไก่ชนจิกตอนไปเชียร์","นั่งสมาธิจนลืมลุก","ดมพริกแห้งตอนคั่ว","ฝึกวิชาเหาะแล้วลืมวิธีลง","กินหมูกระทะคนเดียวสามถาด","ตกใจเสียงจิ้งจกทัก","แอบกินขนมเซ่นไหว้","โดนผึ้งต่อยตอนขโมยน้ำผึ้ง","เขินจนหัวใจวาย","นอนตากแดดจนกลายเป็นข้าวเกรียบ","เล่นซ่อนหาแล้วไม่มีใครหาเจอ","ดำน้ำหาสร้อยที่ทำหล่น","จามแรงจนตกระเบียง","สู้กับห่านเรื่องขนมปัง","ถูกช้างเหยียบตอนขอหวย","ร้องไห้ดูละครจนขาดน้ำ","กินลูกชิ้นทอดร้อนๆ ทั้งลูก","ปั่นจักรยานไม่ดูทางตกบ่อปลา","โกหกแม่แล้วโดนจับได้"];
 const $=id=>document.getElementById(id);
 function hash(s){let h=2166136261;for(const c of s){h^=c.codePointAt(0);h=Math.imul(h,16777619)}return h>>>0}
 let R;
@@ -76,11 +136,12 @@ function go(){
   const n=$('name').value.trim(),b=$('bd').value;
   if(!n){alert('ใส่ชื่อก่อนนะ');return}
   const h=hash(n.toLowerCase()+'|'+b);
-  R={n,l:LIVES[h%LIVES.length],d:DEATH[(h>>5)%DEATH.length],y:1350+(h>>9)%400,p:70+(h>>13)%30};
+  R={n,l:LIVES[h%LIVES.length],d:DEATH[(h>>>5)%DEATH.length],y:1350+(h>>>9)%400,p:70+(h>>>13)%30};
   $('form').style.display='none';$('load').style.display='block';
   const t=["กำลังย้อนเวลา...","เปิดบันทึกกรรม...","ดวงจิตกำลังตอบ..."];let i=0;
   const iv=setInterval(()=>{$('lt').textContent=t[++i%3]},700);
-  setTimeout(()=>{clearInterval(iv);$('load').style.display='none';draw();$('res').style.display='block'},2200);
+  const fl=Promise.all(['600 52px Mitr','46px Sarabun'].map(f=>document.fonts.load(f,'ชาติ'))).catch(()=>{});
+  setTimeout(async()=>{await fl;clearInterval(iv);$('load').style.display='none';draw();$('img').src=$('cv').toDataURL('image/png');$('res').style.display='block';window.scrollTo(0,0)},2200);
 }
 function wrap(c,t,x,y,w,lh){let line='';for(const ch of t){if(c.measureText(line+ch).width>w){c.fillText(line,x,y);line=ch;y+=lh}else line+=ch}c.fillText(line,x,y)}
 function draw(){
@@ -91,20 +152,39 @@ function draw(){
   c.textAlign='center';c.fillStyle='#ffd166';c.font='600 52px Mitr';
   c.fillText('ชาติที่แล้วของ "'+R.n+'"',W/2,150);
   c.font='260px serif';c.fillText(R.l[0],W/2,480);
-  c.fillStyle='#fff';c.font='600 96px Mitr';c.fillText(R.l[1],W/2,640);
+  c.fillStyle='#fff';let fs=96;do{c.font='600 '+fs+'px Mitr';fs-=4}while(c.measureText(R.l[1]).width>1000&&fs>40);c.fillText(R.l[1],W/2,640);
   c.fillStyle='#ffd166';c.font='44px Sarabun';c.fillText('มีชีวิตอยู่ราว พ.ศ. '+(R.y+543),W/2,720);
   c.fillStyle='#fff';c.font='46px Sarabun';wrap(c,R.l[2],W/2,830,880,64);
-  c.fillStyle='#ff6fb5';c.font='42px Sarabun';c.fillText('สาเหตุที่จากไป: '+R.d+' 💀',W/2,1010);
+  c.fillStyle='#ff6fb5';c.font='42px Sarabun';wrap(c,'สาเหตุที่จากไป: '+R.d+' 💀',W/2,1000,960,56);
   c.fillStyle='#ffd166';c.font='600 58px Mitr';c.fillText('ความแม่น '+R.p+'%',W/2,1120);
   c.fillStyle='rgba(255,255,255,.6)';c.font='36px Sarabun';c.fillText('มาดูชาติที่แล้วของคุณ 👉 '+location.host,W/2,1270);
 }
 function blob(){return new Promise(r=>$('cv').toBlob(r,'image/png'))}
-async function save(){const a=document.createElement('a');a.href=URL.createObjectURL(await blob());a.download='ชาติที่แล้ว.png';a.click()}
+const UA=navigator.userAgent;
+const INAPP=/FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|TikTok|musical_ly/i.test(UA);
+const IOS=/iPhone|iPad|iPod/i.test(UA);
+function tipBox(msg){$('mt').innerHTML=msg;$('mimg').src=$('img').src;$('modal').style.display='flex'}
+async function fileObj(){return new File([await blob()],'past-life.png',{type:'image/png'})}
+async function save(){
+  if(INAPP||IOS){tipBox('📲 <b>กดค้างที่รูปด้านล่าง</b> แล้วเลือก <b>"บันทึกรูปภาพ"</b>');return}
+  try{
+    const f=await fileObj();
+    if(/Android/i.test(UA)&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}
+    const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download='ชาติที่แล้ว.png';document.body.appendChild(a);a.click();a.remove();
+  }catch(e){tipBox('📲 <b>กดค้างที่รูปด้านล่าง</b> แล้วเลือก <b>"บันทึกรูปภาพ"</b>')}
+}
 async function share(){
-  const f=new File([await blob()],'past-life.png',{type:'image/png'}),txt='ชาติที่แล้วฉันเป็น '+R.l[1]+' 😱 ลองของคุณ!';
-  try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],text:txt,url:location.href});
-  else if(navigator.share)await navigator.share({text:txt,url:location.href});
-  else{await navigator.clipboard.writeText(txt+' '+location.href);alert('คัดลอกลิงก์แล้ว!')}}catch(e){}
+  const txt='ชาติที่แล้วฉันเป็น "'+R.l[1]+'" '+R.l[0]+' 😱 มาลองของคุณ 👉 '+location.href;
+  try{
+    const f=await fileObj();
+    if(!INAPP&&navigator.canShare&&navigator.canShare({files:[f]})){
+      try{await navigator.clipboard.writeText(txt)}catch(e){}
+      await navigator.share({files:[f],text:txt});return}
+  }catch(e){if(e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(txt)}catch(e){}
+  tipBox(INAPP
+    ?'📲 แอปนี้แชร์รูปตรงไม่ได้<br>1) <b>กดค้างที่รูป → บันทึกรูปภาพ</b><br>2) โพสต์รูปลงเฟส/LINE ได้เลย<br>✅ คัดลอกข้อความ+ลิงก์ให้แล้ว วางในโพสต์ได้เลย<br><small>หรือกด ⋯ มุมขวาบน → "เปิดในเบราว์เซอร์" เพื่อแชร์ตรง</small>'
+    :'📲 <b>กดค้างที่รูป → บันทึกรูปภาพ</b> แล้วโพสต์ได้เลย<br>✅ คัดลอกข้อความ+ลิงก์ให้แล้ว');
 }
 function again(){$('res').style.display='none';$('form').style.display='block';$('name').value='';$('name').focus()}
 </script>

@@ -143,21 +143,22 @@ function go(){
   const fl=Promise.all(['600 52px Mitr','46px Sarabun'].map(f=>document.fonts.load(f,'ชาติ'))).catch(()=>{});
   setTimeout(async()=>{await fl;clearInterval(iv);$('load').style.display='none';draw();$('img').src=$('cv').toDataURL('image/png');$('res').style.display='block';window.scrollTo(0,0)},2200);
 }
-function wrap(c,t,x,y,w,lh){let line='';for(const ch of t){if(c.measureText(line+ch).width>w){c.fillText(line,x,y);line=ch;y+=lh}else line+=ch}c.fillText(line,x,y)}
+function ct(c,t,x,y){c.textAlign='left';const w=c.measureText(t).width;c.fillText(t,x-w/2,y)}
+function wrap(c,t,x,y,w,lh){let line='';for(const ch of t){if(c.measureText(line+ch).width>w){ct(c,line,x,y);line=ch;y+=lh}else line+=ch}ct(c,line,x,y)}
 function draw(){
   const c=$('cv').getContext('2d'),W=1080,H=1350;
   const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,'#3b1466');g.addColorStop(1,'#1a0b2e');
   c.fillStyle=g;c.fillRect(0,0,W,H);
   for(let i=0;i<80;i++){c.fillStyle='rgba(255,255,255,'+Math.random()*.6+')';c.beginPath();c.arc(Math.random()*W,Math.random()*H,Math.random()*3,0,7);c.fill()}
-  c.textAlign='center';c.fillStyle='#ffd166';c.font='600 52px Mitr';
-  c.fillText('ชาติที่แล้วของ "'+R.n+'"',W/2,150);
-  c.font='260px serif';c.fillText(R.l[0],W/2,480);
-  c.fillStyle='#fff';let fs=96;do{c.font='600 '+fs+'px Mitr';fs-=4}while(c.measureText(R.l[1]).width>1000&&fs>40);c.fillText(R.l[1],W/2,640);
-  c.fillStyle='#ffd166';c.font='44px Sarabun';c.fillText('มีชีวิตอยู่ราว พ.ศ. '+(R.y+543),W/2,720);
+  c.textAlign='left';c.textBaseline='alphabetic';c.fillStyle='#ffd166';{let f=52;do{c.font='600 '+f+'px Mitr';f-=2}while(c.measureText('ชาติที่แล้วของ "'+R.n+'"').width>980&&f>28)}
+  ct(c,'ชาติที่แล้วของ "'+R.n+'"',W/2,150);
+  c.font='260px serif';ct(c,R.l[0],W/2,480);
+  c.fillStyle='#fff';let fs=96;do{c.font='600 '+fs+'px Mitr';fs-=4}while(c.measureText(R.l[1]).width>1000&&fs>40);ct(c,R.l[1],W/2,640);
+  c.fillStyle='#ffd166';c.font='44px Sarabun';ct(c,'มีชีวิตอยู่ราว พ.ศ. '+(R.y+543),W/2,720);
   c.fillStyle='#fff';c.font='46px Sarabun';wrap(c,R.l[2],W/2,830,880,64);
   c.fillStyle='#ff6fb5';c.font='42px Sarabun';wrap(c,'สาเหตุที่จากไป: '+R.d+' 💀',W/2,1000,960,56);
-  c.fillStyle='#ffd166';c.font='600 58px Mitr';c.fillText('ความแม่น '+R.p+'%',W/2,1120);
-  c.fillStyle='rgba(255,255,255,.6)';c.font='36px Sarabun';c.fillText('มาดูชาติที่แล้วของคุณ 👉 '+location.host,W/2,1270);
+  c.fillStyle='#ffd166';c.font='600 58px Mitr';ct(c,'ความแม่น '+R.p+'%',W/2,1120);
+  c.fillStyle='rgba(255,255,255,.6)';c.font='36px Sarabun';ct(c,'มาดูชาติที่แล้วของคุณ 👉 '+location.host,W/2,1270);
 }
 function blob(){return new Promise(r=>$('cv').toBlob(r,'image/png'))}
 const UA=navigator.userAgent;
